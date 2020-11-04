@@ -1,6 +1,3 @@
-import axios from "axios";
-import { API_URL } from "./constants";
-
 export const tokenHeader = () => {
   const auth = JSON.parse(localStorage.getItem("auth"));
   const header = {
@@ -11,14 +8,11 @@ export const tokenHeader = () => {
   return header;
 };
 
-export const getError = (e) => {
+export const responseError = (e) => {
   if (e.response && e.response.status === 401) {
-    logout();
+    localStorage.removeItem("auth");
   }
   const message = e.response ? e.response.data.message : e.message;
   return new Error(message);
 }
 
-export const logout = () => {
-  localStorage.removeItem("auth");
-};

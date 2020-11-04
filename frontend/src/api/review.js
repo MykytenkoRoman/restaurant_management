@@ -1,6 +1,7 @@
 import axios from "axios";
-import { API_URL } from "./constants";
-
+import { API_URL } from "../utils/constants";
+import { omitBy, isNil } from 'lodash';
+import { tokenHeader, responseError } from './common';
 
 export const fetchReviews = async (params = {}) => {
   try {
@@ -10,14 +11,9 @@ export const fetchReviews = async (params = {}) => {
       .join("&");
 
     const response = await axios.get(`${API_URL}/reviews?${query}`, tokenHeader());
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -32,14 +28,9 @@ export const fetchReviewsForRestaurant = async (restaurantId, params = {}) => {
       `${API_URL}/restaurants/${restaurantId}/reviews?${query}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -54,14 +45,9 @@ export const fetchPendingReviews = async (params = {}) => {
       `${API_URL}/reviews/pending?${query}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -71,14 +57,9 @@ export const fetchReview = async (reviewId) => {
       `${API_URL}/reviews/${reviewId}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -89,14 +70,9 @@ export const createReview = async (restaurantId, data) => {
       data,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -107,14 +83,9 @@ export const updateReview = async (reviewId, data) => {
       data,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -124,14 +95,9 @@ export const deleteReview = async (reviewId) => {
       `${API_URL}/reviews/${reviewId}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -142,14 +108,9 @@ export const replyToReview = async (reviewId, data) => {
       data,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -160,14 +121,9 @@ export const updateReply = async (reviewId, data) => {
       data,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };
 
@@ -177,13 +133,8 @@ export const deleteReply = async (reviewId) => {
       `${API_URL}/reviews/${reviewId}/reply`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    throw responseError(e);
   }
 };

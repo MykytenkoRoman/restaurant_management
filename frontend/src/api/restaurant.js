@@ -1,5 +1,7 @@
 import axios from "axios";
-import { API_URL } from "./constants";
+import { API_URL } from "../utils/constants";
+import { omitBy, isNil } from 'lodash';
+import { tokenHeader, responseError } from './common';
 
 export const fetchRestaurants = async (params = {}) => {
   try {
@@ -12,14 +14,9 @@ export const fetchRestaurants = async (params = {}) => {
       `${API_URL}/restaurants?${query}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };
 
@@ -34,14 +31,9 @@ export const fetchOwnedRestaurants = async (params = {}) => {
       `${API_URL}/restaurants/owned?${query}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };
 
@@ -55,14 +47,9 @@ export const fetchRestaurantUsers = async (restaurantId, params = {}) => {
       `${API_URL}/restaurants/${restaurantId}/users?${query}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };
 
@@ -72,28 +59,18 @@ export const fetchRestaurant = async (restaurantId) => {
       `${API_URL}/restaurants/${restaurantId}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };
 
 export const createRestaurant = async (data) => {
   try {
     const response = await axios.post(`${API_URL}/restaurants`, data, tokenHeader());
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };
 
@@ -104,14 +81,9 @@ export const updateRestaurant = async (restaurantId, data) => {
       data,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };
 
@@ -121,13 +93,8 @@ export const deleteRestaurant = async (restaurantId) => {
       `${API_URL}/restaurants/${restaurantId}`,
       tokenHeader()
     );
-    refreshToken();
     return response.data;
   } catch (e) {
-    if (e.response && e.response.status === 401) {
-      logout();
-    }
-    const message = e.response ? e.response.data.message : e.message;
-    throw new Error(message);
+    return responseError(e);
   }
 };

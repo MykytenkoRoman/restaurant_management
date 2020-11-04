@@ -1,7 +1,7 @@
 import axios from "axios";
-import { API_URL } from "./constants";
+import { API_URL } from "../utils/constants";
 
-export const login = async (data) => {
+export const signin = async (data) => {
   try {
     const response = await axios.post(`${API_URL}/signin`, data);
     localStorage.setItem("auth", JSON.stringify(response.data));
@@ -12,7 +12,7 @@ export const login = async (data) => {
   }
 };
 
-export const register = async (data) => {
+export const signup = async (data) => {
   try {
     const response = await axios.post(`${API_URL}/signup`, data);
     localStorage.setItem("auth", JSON.stringify(response.data));
@@ -21,4 +21,8 @@ export const register = async (data) => {
     const message = e.response ? e.response.data.message : e.message;
     throw new Error(message);
   }
+};
+
+export const signout = () => {
+  localStorage.removeItem("auth");
 };
