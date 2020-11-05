@@ -5,7 +5,7 @@ const validationSchema = {
     body: Joi.object({
       name: Joi.string().required(),
       description: Joi.string().required(),
-      cuisine: Joi.string().required(),
+      location: Joi.string().required(),
     }).options({ allowUnknown: true }),
   },
 
@@ -13,7 +13,7 @@ const validationSchema = {
     body: Joi.object({
       name: Joi.string(),
       description: Joi.string(),
-      cuisine: Joi.string(),
+      location: Joi.string(),
     }).options({ allowUnknown: true }),
   },
 };

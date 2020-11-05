@@ -26,7 +26,7 @@ const restaurantSchema = new mongoose.Schema(
 restaurantSchema.method({
   objectResponse() {
     const transformed = {};
-    const fields = ["id", "name", "description", "cuisine", "owner"];
+    const fields = ["id", "name", "description", "location", "owner"];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
@@ -70,7 +70,7 @@ restaurantSchema.statics = {
             id: "$_id",
             name: 1,
             description: 1,
-            cuisine: 1,
+            location: 1,
             createdAt: 1,
             "owner.id": "$owner._id",
             "owner.name": 1,
@@ -117,7 +117,7 @@ restaurantSchema.statics = {
       match["$or"] = [
         { name: RegExp(query, "i") },
         { description: RegExp(query, "i") },
-        { cuisine: RegExp(query, "i") },
+        { location: RegExp(query, "i") },
       ];
     }
 
@@ -155,7 +155,7 @@ restaurantSchema.statics = {
             id: "$_id",
             name: 1,
             description: 1,
-            cuisine: 1,
+            location: 1,
             createdAt: 1,
             "owner.id": "$owner._id",
             "owner.name": 1,

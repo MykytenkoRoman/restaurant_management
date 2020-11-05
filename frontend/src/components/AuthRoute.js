@@ -7,11 +7,7 @@ const AuthRoute = ({ roles, component, components, ...rest }) => {
   let permitted = true;
   const auth = JSON.parse(localStorage.getItem("auth"));
   if (auth) {
-    const { expiresIn } = auth.token;
-    if (moment(expiresIn) < moment()) {
-      localStorage.removeItem("auth");
-      isAuthenticated = false;
-    }
+    isAuthenticated = true;
   } else {
     isAuthenticated = false;
   }

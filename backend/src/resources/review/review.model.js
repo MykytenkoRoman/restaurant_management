@@ -145,7 +145,7 @@ reviewSchema.statics = {
       }
       let reviews = await this.aggregate(aggregate);
 
-      countAggregate = [
+      let countAggregate = [
         {
           $lookup: {
             from: "restaurants",
