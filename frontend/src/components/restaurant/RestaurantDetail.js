@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Pagination from "react-js-pagination";
-import StarRatings from "react-star-ratings";
+import Pagination from "../common/Pagination";
+import StarRatings from "../common/StarRatings";
 import { useParams } from "react-router-dom";
 import ReviewForm from "../review/ReviewForm";
 import Review from "../review/Review";
@@ -8,14 +8,7 @@ import RatingFilter from "../common/RatingFilter";
 import ReplyForm from "../reply/ReplyForm";
 import Reply from "../reply/Reply";
 import ConfirmModal from "../common/ConfirmModal";
-import {
-  fetchReviewsForRestaurant,
-  fetchRestaurant,
-  createReview,
-  replyToReview,
-  deleteReview,
-  deleteReply,
-} from "../../api";
+import * as API from "../../api";
 import { Role } from "../../utils/constants";
 
 export default function RestaurantDetail({ history }) {
@@ -24,12 +17,10 @@ export default function RestaurantDetail({ history }) {
   const [reviews, setReviews] = useState([]);
   const [fetchError, setFetchError] = useState(null);
   const [loaded, setLoaded] = useState(false);
-  const [search, ] = useState("");
   const [rateFilter, setRateFilter] = useState(0);
   const [total, setTotal] = useState(0);
-  const [perPage, ] = useState(5);
+  const [pageSize] = useState(5);
   const [page, setPage] = useState(1);
-  const [pending, ] = useState(false);
   const [submitReviewError, setSubmitReviewError] = useState(null);
   const [replyReviewId, setReplyReviewId] = useState(0);
   const [submitReplyError, setSubmitReplyError] = useState(null);
@@ -40,12 +31,13 @@ export default function RestaurantDetail({ history }) {
   });
   const auth = JSON.parse(localStorage.getItem("auth"));
   const editable = auth.user.role === Role.Admin;
+
   async function fetchRestaurantData() {
     if (!restaurantId) {
       history.goBack();
     }
     try {
-      const data = await fetchRestaurant(restaurantId);
+      const data = await API.fetchRestaurant(restaurantId);
       setRestaurant(data);
     } catch (e) {
       history.goBack();
@@ -54,11 +46,10 @@ export default function RestaurantDetail({ history }) {
 
   async function fetchReviewsData() {
     try {
-      const data = await fetchReviewsForRestaurant(restaurantId, {
+      const data = await API.fetchReviewsForRestaurant(restaurantId, {
         page,
-        perPage,
+        pageSize,
         rate: rateFilter,
-        noreply: pending,
       });
 
       setReviews(data.reviews);
@@ -76,11 +67,11 @@ export default function RestaurantDetail({ history }) {
 
   useEffect(() => {
     fetchReviewsData();
-  }, [page, perPage, search, rateFilter, restaurantId, pending]);
+  }, [page, pageSize, rateFilter, restaurantId]);
 
   const onSubmitReview = async (data) => {
     try {
-      await createReview(restaurantId, data);
+      await API.createReview(restaurantId, data);
       fetchReviewsData();
       fetchRestaurantData();
     } catch (e) {
@@ -98,7 +89,7 @@ export default function RestaurantDetail({ history }) {
   };
   const onReply = async (reviewId, replyData) => {
     try {
-      const data = await replyToReview(reviewId, replyData);
+      const data = await API.replyToReview(reviewId, replyData);
       const newReviews = reviews.map((review) =>
         review.id === reviewId ? data : review
       );
@@ -140,9 +131,9 @@ export default function RestaurantDetail({ history }) {
   const onDialogConfirm = async () => {
     try {
       if (ConfirmModalInfo.action === "delete_review") {
-        await deleteReview(ConfirmModalInfo.id);
+        await API.deleteReview(ConfirmModalInfo.id);
       } else if (ConfirmModalInfo.action === "delete_reply") {
-        await deleteReply(ConfirmModalInfo.id);
+        await API.deleteReply(ConfirmModalInfo.id);
       }
       fetchReviewsData();
       fetchRestaurantData();
@@ -176,8 +167,7 @@ export default function RestaurantDetail({ history }) {
                   onDelete={onClickDeleteReply}
                 />
               )}
-              {(auth.user.role === Role.Admin ||
-                auth.user.role === Role.Owner) && (
+              {auth.user.role === Role.Owner && (
                 <>
                   {replyReviewId !== review.id && !review.reply && (
                     <a
@@ -203,6 +193,7 @@ export default function RestaurantDetail({ history }) {
               )}
             </div>
           ))}
+        {loaded && reviews.length === 0 && <p>No reviews found.</p>}
       </div>
     );
   };
@@ -214,12 +205,7 @@ export default function RestaurantDetail({ history }) {
             <div className="card-body">
               <h1 className="mb-0 pb-2 border-bottom">{restaurant.name}</h1>
               <div className="mb-2">
-                <StarRatings
-                  rating={restaurant.rate || 0}
-                  starDimension="20px"
-                  starSpacing="0px"
-                  starRatedColor="#da3743"
-                />{" "}
+                <StarRatings rating={restaurant.rate || 0} />{" "}
                 <span
                   className=" ml-2"
                   style={{ position: "relative", top: "3px" }}
@@ -233,13 +219,12 @@ export default function RestaurantDetail({ history }) {
                   <i className="far fa-comment-alt pr-2 align-middle"></i>
                   {restaurant.reviewCount} reviews
                 </span>
-                <span
-                  className="ml-4"
-                  style={{ position: "relative", top: "4px" }}
-                >
-                  <i className="fas fa-utensils pr-2 align-middle"></i>
-                  {restaurant.location}
-                </span>
+                <div className="my-2">
+                  <span style={{ position: "relative", top: "4px" }}>
+                    <i className="fas fa-map-marker-alt pr-2 align-middle"></i>
+                    {restaurant.location}
+                  </span>
+                </div>
               </div>
               <div className="mb-3">
                 {restaurant.description.split("\n").map((line, idx) => (
@@ -248,7 +233,7 @@ export default function RestaurantDetail({ history }) {
               </div>
 
               {restaurant &&
-                auth.user.role !== Role.Owner &&
+                auth.user.role === Role.Customer &&
                 !restaurant.reviewed && (
                   <div className="mt-5">
                     <h4 className="border-bottom pb-2">
@@ -290,18 +275,15 @@ export default function RestaurantDetail({ history }) {
                     <h4 className="pb-2">Reviews</h4>
 
                     {renderReviews()}
-                    <Pagination
-                      itemClass="page-item"
-                      linkClass="page-link"
-                      innerClass="pagination float-left mt-3"
-                      prevPageText="‹"
-                      nextPageText="›"
-                      activePage={page}
-                      itemsCountPerPage={perPage}
-                      totalItemsCount={total}
-                      pageRangeDisplayed={5}
-                      onChange={(p) => setPage(p)}
-                    />
+                    <div className="float-left mt-3">
+                      <Pagination
+                        page={page}
+                        pageSize={pageSize}
+                        total={total}
+                        onChange={(p) => setPage(p)}
+                      />
+                    </div>
+
                     <div className="float-left">
                       <div className="my-3 ml-5">
                         <span className="mr-3">Filter by</span>{" "}

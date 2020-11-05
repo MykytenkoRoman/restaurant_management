@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import RestaurantForm from "./RestaurantForm";
-import { createRestaurant } from "../../api";
+import * as API from "../../api";
 
 export default function CreateRestaurant({ history }) {
   const [submitError, setSubmitError] = useState(null);
 
   const submitForm = async (formData) => {
     try {
-      await createRestaurant(formData);
+      await API.createRestaurant(formData);
       history.push("/restaurants");
     } catch (e) {
       setSubmitError(e.message);

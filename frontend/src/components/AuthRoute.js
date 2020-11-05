@@ -33,7 +33,7 @@ const AuthRoute = ({ roles, component, components, ...rest }) => {
             <Redirect to="/" />
           )
         ) : (
-          <Redirect to="/login" />
+          <Redirect to="/signin" />
         )
       }
     />

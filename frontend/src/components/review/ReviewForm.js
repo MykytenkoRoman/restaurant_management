@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import StarRatings from "react-star-ratings";
+import StarRatings from "../common/StarRatings";
 import DatePicker from "react-datepicker";
 
 export default function ReviewForm({
@@ -47,10 +47,6 @@ export default function ReviewForm({
       <StarRatings
         rating={rate}
         changeRating={onChangeRate}
-        starDimension="15px"
-        starSpacing="0px"
-        starRatedColor="#da3743"
-        starRatedColor="#da3743"
       />
 
       <div className="mt-2">

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { fetchRestaurants } from "../../api";
-import Pagination from "react-js-pagination";
+import * as API from "../../api";
+import Pagination from "../common/Pagination";
 import RatingFilter from "../common/RatingFilter";
-import StarRatings from "react-star-ratings";
+import StarRatings from "../common/StarRatings";
 
 export default function UserRestaurantList({ history }) {
   const [restaurants, setRestaurants] = useState([]);
@@ -10,15 +10,15 @@ export default function UserRestaurantList({ history }) {
   const [loaded, setLoaded] = useState(false);
   const [query, setQuery] = useState("");
   const [total, setTotal] = useState(0);
-  const [perPage, ] = useState(5);
+  const [pageSize] = useState(5);
   const [page, setPage] = useState(1);
   const [rateFilter, setRateFilter] = useState(0);
 
   async function fetchData() {
     try {
-      const data = await fetchRestaurants({
+      const data = await API.fetchRestaurants({
         page,
-        perPage,
+        pageSize,
         query,
         rate: rateFilter,
       });
@@ -33,13 +33,13 @@ export default function UserRestaurantList({ history }) {
 
   useEffect(() => {
     fetchData();
-  }, [page, perPage, query, rateFilter]);
+  }, [page, pageSize, query, rateFilter]);
 
   const onClickRestaurant = (restaurantId) => {
     history.push(`/restaurants/${restaurantId}`);
   };
 
-  const pageCount = Math.floor(total / perPage) + 1;
+  const pageCount = Math.floor(total / pageSize) + 1;
 
   const renderTable = () => {
     return (
@@ -53,12 +53,7 @@ export default function UserRestaurantList({ history }) {
             >
               <h5 className="my-0">{restaurant.name}</h5>
               <div className="">
-                <StarRatings
-                  rating={restaurant.rate || 0}
-                  starDimension="15px"
-                  starSpacing="0px"
-                  starRatedColor="#da3743"
-                />{" "}
+                <StarRatings rating={restaurant.rate || 0} />{" "}
                 <span
                   className="ml-4 small"
                   style={{ position: "relative", top: "3px" }}
@@ -66,13 +61,16 @@ export default function UserRestaurantList({ history }) {
                   <i className="far fa-comment-alt pr-1 align-middle"></i>
                   {restaurant.reviewCount} reviews
                 </span>
-                <span
-                  className="ml-4 small"
-                  style={{ position: "relative", top: "3px" }}
-                >
-                  <i className="fas fa-utensils pr-1 align-middle"></i>
-                  {restaurant.location}
-                </span>
+                <div>
+                  <span
+                    className=" small"
+                    style={{ position: "relative", top: "3px" }}
+                  >
+                    <i className="fas fa-map-marker-alt pr-1 align-middle"></i>
+
+                    {restaurant.location}
+                  </span>
+                </div>
               </div>
               <div className="small"></div>
 
@@ -127,15 +125,9 @@ export default function UserRestaurantList({ history }) {
           <div className="mt-4">
             <div className="float-right">
               <Pagination
-                itemClass="page-item"
-                linkClass="page-link"
-                innerClass="pagination float-right"
-                prevPageText="‹"
-                nextPageText="›"
-                activePage={page}
-                itemsCountPerPage={perPage}
-                totalItemsCount={total}
-                pageRangeDisplayed={5}
+                page={page}
+                pageSize={pageSize}
+                total={total}
                 onChange={(p) => setPage(p)}
               />
             </div>

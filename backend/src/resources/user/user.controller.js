@@ -28,11 +28,9 @@ const create = async (req, res, next) => {
   try {
     const existing = await User.findOne({ email: req.body.email });
     if (existing) {
-      const error = new APIError({
-        message: "Email already exists.",
-        status: httpStatus.CONFLICT,
-      });
-      return next(error);
+      return res
+        .status(httpStatus.CONFLICT)
+        .json({ message: "Email already exists." });
     }
     const user = new User(req.body);
     const savedUser = await user.save();
@@ -48,11 +46,9 @@ const update = async (req, res, next) => {
     if (req.locals.user.email !== req.body.email) {
       const existing = await User.findOne({ email: req.body.email });
       if (existing) {
-        const error = new APIError({
-          message: "Email already exists.",
-          status: httpStatus.CONFLICT,
-        });
-        return next(error);
+        return res
+        .status(httpStatus.CONFLICT)
+        .json({ message: "Email already exists." });
       }
     }
     const ommitRole = req.user.role !== Role.Admin ? "role" : "";
@@ -92,11 +88,34 @@ const remove = async (req, res, next) => {
   }
 };
 
+const me = (req, res) => res.json(req.user.objectResponse());
+
+const updateMe = async (req, res, next) => {
+  try {
+    if (req.user.email !== req.body.email) {
+      const existing = await User.findOne({ email: req.body.email });
+      if (existing) {
+        return res
+        .status(httpStatus.FORBIDDEN)
+        .json({ message: "Email already exists." });
+      }
+    }
+    const updatedUser = omit(req.body, "role");
+    const user = Object.assign(req.user, updatedUser);
+    const savedUser = await user.save();
+    res.json(savedUser.objectResponse());
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   load,
   get,
   create,
   update,
   list,
+  me,
+  updateMe,
   remove
 }

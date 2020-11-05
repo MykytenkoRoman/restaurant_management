@@ -22,38 +22,23 @@ const load = async (req, res, next, id) => {
 
 const get = async (req, res, next) => {
   try {
-    let restaurant = await Restaurant.detail(req.locals.restaurant._id);
-    console.log(restaurant);
-    let highestReview = await Review.findOne(
-      { restaurant: req.locals.restaurant._id },
-      "id rate comment reply, user, visitDate",
-      { sort: { rate: -1 } }
-    ).populate("user");
-    let lowestReview = await Review.findOne(
-      { restaurant: req.locals.restaurant._id },
-      "id rate comment reply, user, visitDate",
-      { sort: { rate: 1 } }
-    ).populate("user");
-    if (highestReview) {
-      highestReview = highestReview.objectResponse();
+    let restaurant = await Restaurant.get(req.locals.restaurant._id);
+    let reviewProperties = "id rate comment reply, user, visitDate";
+    let restaurantId = req.locals.restaurant._id;
+    let highestReview = await Review.findOne({ restaurant: restaurantId }, reviewProperties, { sort: { rate: -1 } }).populate("user");
+    let lowestReview = await Review.findOne({ restaurant: restaurantId }, reviewProperties, { sort: { rate: 1 } }).populate("user");
+    if (highestReview && lowestReview) {
+      restaurant.highestReview = highestReview.objectResponse();
+      restaurant.lowestReview = lowestReview.objectResponse();
     }
 
-    if (lowestReview) {
-      lowestReview = lowestReview.objectResponse();
-    }
-
-    const myReview = await Review.findOne({
-      restaurant: req.locals.restaurant._id,
-      user: req.user._id,
-    });
+    const myReview = await Review.findOne({restaurant: restaurantId, user: req.user._id});
     if (myReview) {
       restaurant.reviewed = true;
     } else {
       restaurant.reviewed = false;
     }
 
-    restaurant.highestReview = highestReview;
-    restaurant.lowestReview = lowestReview;
     res.json(restaurant);
   } catch (error) {
     next(error);
@@ -78,11 +63,9 @@ const update = (req, res, next) => {
     req.user.role !== Role.Admin &&
     !req.locals.restaurant.owner.equals(req.user.id)
   ) {
-    const error = new APIError({
-      message: "You don't have permission.",
-      status: httpStatus.FORBIDDEN,
-    });
-    return next(error);
+    return res
+      .status(httpStatus.FORBIDDEN)
+      .json({ message: "You don't have permission." });
   }
 
   const restaurant = Object.assign(req.locals.restaurant, restaurantData);
@@ -118,11 +101,9 @@ const remove = async (req, res, next) => {
     req.user.role !== Role.Admin &&
     !req.locals.restaurant.owner.equals(req.user._id)
   ) {
-    const error = new APIError({
-      message: "You don't have permission.",
-      status: httpStatus.FORBIDDEN,
-    });
-    return next(error);
+    return res
+      .status(httpStatus.FORBIDDEN)
+      .json({ message: "You don't have permission." });
   }
 
   try {

@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import { updateProfile } from "../../services";
-import AppContext from "../AppContext";
+import * as API from "../../api";
 
-const Account = () => {
+const Profile = ({ history }) => {
   const auth = JSON.parse(localStorage.getItem("auth"));
-  const appContext = useContext(AppContext);
   const [name, setName] = useState(auth.user.name);
   const [email, setEmail] = useState(auth.user.email);
   const [password, setPassword] = useState("");
@@ -43,12 +41,12 @@ const Account = () => {
         if (password && password.length > 0) {
           data["password"] = password;
         }
-        const newProfile = await updateProfile(data);
+        const newProfile = await API.updateProfile(data);
         auth.user = newProfile;
         localStorage.setItem("auth", JSON.stringify(auth));
         setMessage("Your profile has been updated successfully.");
         setSubmitError(null);
-        appContext.setAuth(auth);
+        history.push('/profile')
       } catch (e) {
         console.log(e.message);
         setSubmitError(e.message);
@@ -60,8 +58,8 @@ const Account = () => {
   const roleText = (role) => {
     if (role === "admin") {
       return "Admin";
-    } else if (role === "regular") {
-      return "Regular";
+    } else if (role === "customer") {
+      return "Customer";
     } else if (role === "owner") {
       return "Owner";
     }
@@ -80,6 +78,17 @@ const Account = () => {
 
             <div className="card-body">
               <form onSubmit={handleSubmit}>
+                <div className="form-group row font-weight-bold">
+                  <label className="col-md-4 col-form-label text-md-right">
+                    User Type
+                  </label>
+
+                  <div className="col-md-6">
+                    <label className="col-form-label text-md-right">
+                      {roleText(auth.user.role)}
+                    </label>
+                  </div>
+                </div>
                 <div className="form-group row">
                   <label className="col-md-4 col-form-label text-md-right">
                     Name
@@ -146,18 +155,6 @@ const Account = () => {
                   </div>
                 </div>
 
-                <div className="form-group row">
-                  <label className="col-md-4 col-form-label text-md-right">
-                    User Type
-                  </label>
-
-                  <div className="col-md-6">
-                    <label className="col-form-label text-md-right">
-                      {roleText(auth.user.role)}
-                    </label>
-                  </div>
-                </div>
-
                 <div className="form-group row mb-0">
                   <div className="col-md-6 offset-md-4">
                     {submitError && (
@@ -178,4 +175,4 @@ const Account = () => {
     </div>
   );
 };
-export default Account;
+export default Profile;

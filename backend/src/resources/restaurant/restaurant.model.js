@@ -42,7 +42,7 @@ restaurantSchema.method({
 
 restaurantSchema.statics = {
 
-  async detail(id) {
+  async get(id) {
     let match = { id: mongoose.Types.ObjectId(id) };
 
     try {

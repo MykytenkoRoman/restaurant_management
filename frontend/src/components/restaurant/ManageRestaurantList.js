@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Pagination from "react-js-pagination";
-import StarRatings from "react-star-ratings";
+import Pagination from "../common/Pagination";
+import StarRatings from "../common/StarRatings";
 import { Link } from "react-router-dom";
 import { Role } from "../../utils/constants";
-import { fetchRestaurants, deleteRestaurant } from "../../api";
+import * as API from "../../api";
 import ConfirmModal from "../common/ConfirmModal";
 
 export default function ManageRestaurantList({ history }) {
@@ -12,7 +12,7 @@ export default function ManageRestaurantList({ history }) {
   const [loaded, setLoaded] = useState(false);
   const [query, setQuery] = useState("");
   const [total, setTotal] = useState(0);
-  const [perPage, setPerPage] = useState(5);
+  const [pageSize, setPageSize] = useState(5);
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(-1);
@@ -20,7 +20,7 @@ export default function ManageRestaurantList({ history }) {
 
   async function fetchData() {
     try {
-      const data = await fetchRestaurants({ page, perPage, query });
+      const data = await API.fetchRestaurants({ page, pageSize, query });
       setRestaurants(data.restaurants);
       setTotal(data.total);
       setPage(data.page);
@@ -32,7 +32,7 @@ export default function ManageRestaurantList({ history }) {
 
   useEffect(() => {
     fetchData();
-  }, [page, perPage, query]);
+  }, [page, pageSize, query]);
 
   const onClickRestaurant = (restaurantId) => {
     history.push(`/restaurants/${restaurantId}`);
@@ -47,15 +47,15 @@ export default function ManageRestaurantList({ history }) {
   const onConfirmDelete = async () => {
     setDialogOpen(false);
     try {
-      await deleteRestaurant(selectedId);
+      await API.deleteRestaurant(selectedId);
       fetchData();
     } catch (e) {
       fetchData();
     }
   };
 
-  const startIndex = Math.min(perPage * (page - 1) + 1, total);
-  const endIndex = Math.min(startIndex + perPage - 1, total);
+  const startIndex = Math.min(pageSize * (page - 1) + 1, total);
+  const endIndex = Math.min(startIndex + pageSize - 1, total);
 
   const renderTable = () => {
     return (
@@ -67,7 +67,7 @@ export default function ManageRestaurantList({ history }) {
             <th>location</th>
             <th>Description</th>
             {auth.user.role === Role.Admin && <th>Owner</th>}
-            <th>Rating</th>
+            <th style={{ minWidth: "125px" }}>Rating</th>
             <th>Reviews</th>
             <th>Action</th>
           </tr>
@@ -92,12 +92,7 @@ export default function ManageRestaurantList({ history }) {
                   <td>{restaurant.owner.name}</td>
                 )}
                 <td style={{ minWidth: "120px" }}>
-                  <StarRatings
-                    rating={restaurant.rate || 0}
-                    starDimension="15px"
-                    starSpacing="0px"
-                    starRatedColor="#da3743"
-                  />{" "}
+                  <StarRatings rating={restaurant.rate || 0} />{" "}
                 </td>
                 <td>{restaurant.reviewCount}</td>
                 <td>
@@ -135,13 +130,16 @@ export default function ManageRestaurantList({ history }) {
                   : "All restaurants"}
               </h1>
               <div className="clearfix pt-3">
-                <div className="bs-bars float-right">
-                  <div id="toolbar">
-                    <Link className="btn btn-primary" to="/restaurants/new">
-                      Add new restaurant
-                    </Link>
+                {auth.user.role === Role.Owner && (
+                  <div className="bs-bars float-right">
+                    <div id="toolbar">
+                      <Link className="btn btn-primary" to="/restaurants/new">
+                        Add new restaurant
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                )}
+
                 <div className=" float-left form-group has-search">
                   <span className="fa fa-search form-control-feedback"></span>
                   <input
@@ -168,14 +166,9 @@ export default function ManageRestaurantList({ history }) {
               <div className="float-right"></div>
 
               <Pagination
-                itemClass="page-item"
-                linkClass="page-link"
-                innerClass="pagination float-right"
-                prevPageText="‹"
-                nextPageText="›"
-                activePage={page}
-                itemsCountPerPage={perPage}
-                totalItemsCount={total}
+                page={page}
+                pageSize={pageSize}
+                total={total}
                 pageRangeDisplayed={5}
                 onChange={(p) => setPage(p)}
               />
@@ -186,9 +179,9 @@ export default function ManageRestaurantList({ history }) {
                 Show per page &nbsp;
                 <select
                   className="form-control-sm"
-                  value={perPage}
+                  value={pageSize}
                   onChange={(event) => {
-                    setPerPage(parseInt(event.target.value));
+                    setPageSize(parseInt(event.target.value));
                     setPage(1);
                   }}
                 >

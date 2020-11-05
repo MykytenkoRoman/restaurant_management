@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import RestaurantForm from "./RestaurantForm";
+import UserForm from "./UserForm";
 import * as API from "../../api";
 
-export default function EditRestaurant({ history }) {
-  const [restaurant, setRestaurant] = useState(null);
+export default function EditUser({ history }) {
+  const [user, setUser] = useState(null);
   const [submitError, setSubmitError] = useState(null);
-  const { restaurantId } = useParams();
+  const { userId } = useParams();
+
   useEffect(() => {
     async function fetchData() {
       try {
-        const fetched = await API.fetchRestaurant(restaurantId);
-        setRestaurant(fetched);
+        const fetched = await API.fetchUser(userId);
+        setUser(fetched);
       } catch (e) {
-        history.push("/restaurants");
+        history.push("/users");
       }
     }
 
     fetchData();
-  }, [history, restaurantId]);
+  }, [history, userId]);
 
   const submitForm = async (formData) => {
+    if (!user) {
+      return;
+    }
     try {
-      await API.updateRestaurant(restaurantId, formData);
-      history.push("/restaurants");
+      await API.updateUser(userId, formData);
+      history.push("/users");
     } catch (e) {
       setSubmitError(e.message);
     }
@@ -34,14 +38,12 @@ export default function EditRestaurant({ history }) {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <div className="card">
-          <div className="card-header font-weight-bold">
-            Edit restaurant
-            </div>
+            <div className="card-header font-weight-bold">Edit user</div>
             <div className="card-body">
-              {restaurant && (
-                <RestaurantForm
-                  restaurant={restaurant}
-                  submitButtonText="Update restaurant"
+              {user && (
+                <UserForm
+                  user={user}
+                  submitButtonText="Update user"
                   formError={submitError}
                   handleSubmit={submitForm}
                 />

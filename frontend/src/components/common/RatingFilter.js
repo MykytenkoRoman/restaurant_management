@@ -1,5 +1,5 @@
 import React from "react";
-import StarRatings from "react-star-ratings";
+import StarRatings from "./StarRatings";
 import Dropdown from "react-bootstrap/Dropdown";
 
 export default function RatingFilter({ value, onChange }) {
@@ -11,11 +11,6 @@ export default function RatingFilter({ value, onChange }) {
         ) : (
           <StarRatings
             rating={value}
-            starDimension="15px"
-            starSpacing="0px"
-            starRatedColor="#da3743"
-            className="aaaaaaaaaaaaaaa"
-            style={{background: "#ff0000"}}
           />
         )}
       </Dropdown.Toggle> 
@@ -26,9 +21,6 @@ export default function RatingFilter({ value, onChange }) {
           <Dropdown.Item key={r} className="pb-2" onClick={() => onChange(r)}>
             <StarRatings
               rating={r}
-              starDimension="15px"
-              starSpacing="0px"
-              starRatedColor="#da3743"
             />
           </Dropdown.Item>
         ))}

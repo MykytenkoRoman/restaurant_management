@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import StarRatings from "react-star-ratings";
+import StarRatings from "../common/StarRatings";
 import ReviewForm from "./ReviewForm";
 import moment from "moment-timezone";
-import { updateReview } from "../../api";
+import * as API from "../../api";
 export default function Review({
   editable = false,
   review,
@@ -23,7 +23,7 @@ export default function Review({
 
   const onUpdateReview = async (data) => {
     try {
-      const updated = await updateReview(review.id, data);
+      const updated = await API.updateReview(review.id, data);
       onUpdated(updated);
       setEditing(false);
     } catch (e) {
@@ -61,13 +61,7 @@ export default function Review({
         </div>
       )}
       <div className="">
-        <StarRatings
-          rating={review.rate}
-          starDimension="15px"
-          starSpacing="0px"
-          starRatedColor="#da3743"
-          starHoverColor="#da3743"
-        />{" "}
+        <StarRatings rating={review.rate} />{" "}
         <span
           className="small ml-3"
           style={{ position: "relative", top: "3px" }}

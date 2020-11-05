@@ -31,7 +31,7 @@ router
 router
   .route("/:restaurantId/reviews")
   .get(authorize(), reviewController.listForRestaurant)
-  .post(authorize(), validate(reviewValidation.createReview), reviewController.create);
+  .post(authorize(Role.Customer), validate(reviewValidation.createReview), reviewController.create);
 
 router.param("restaurantId", controller.load);
 

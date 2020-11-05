@@ -27,11 +27,9 @@ const create = async (req, res, next) => {
     const existingReview = await Review.findOne({ user: user._id, restaurant: restaurant._id });
 
     if (existingReview) {
-      const error = new APIError({
-        message: "You already left review to this restaurant.",
-        status: httpStatus.FORBIDDEN
-      });
-      throw error;
+      return res
+        .status(httpStatus.FORBIDDEN)
+        .json({ message: "You already left review to this restaurant." });
     }
 
     const review = new Review(req.body);
@@ -97,18 +95,14 @@ const createReply = async (req, res, next) => {
     const user = req.user, review = req.locals.review;
     
     if (user.role !== Role.Admin && !review.restaurant.owner.equals(user._id)) {
-      const error = new APIError({
-        message: "You are not the owner of the restaurant.",
-        status: httpStatus.FORBIDDEN
-      });
-      throw error;
+      return res
+        .status(httpStatus.FORBIDDEN)
+        .json({ message: "You are not the owner of the restaurant." });
     }
     if (review.reply) {
-      const error = new APIError({
-        message: "You already replied to this review.",
-        status: httpStatus.FORBIDDEN
-      });
-      throw error;
+      return res
+        .status(httpStatus.FORBIDDEN)
+        .json({ message: "You already replied to this review." });
     }
 
     review.reply = req.body.reply;
@@ -125,11 +119,9 @@ const updateReply = async (req, res, next) => {
     const review = req.locals.review;
 
     if (!review.reply) {
-      const error = new APIError({
-        message: "There's no reply to this review.",
-        status: httpStatus.FORBIDDEN
-      });
-      throw error;
+      return res
+        .status(httpStatus.FORBIDDEN)
+        .json({ message: "There's no reply to this review." });
     }
 
     review.reply = req.body.reply;

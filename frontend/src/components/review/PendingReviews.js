@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from "react";
-import Pagination from "react-js-pagination";
-import StarRatings from "react-star-ratings";
+import Pagination from "../common/Pagination";
+import StarRatings from "../common/StarRatings";
 import { Link } from "react-router-dom";
 import ReplyForm from "../reply/ReplyForm";
 import moment from "moment-timezone";
-import { fetchPendingReviews, replyToReview } from "../../services";
+import * as API from "../../api";
 
 export default function PendingReviews({ history }) {
   const [reviews, setReviews] = useState([]);
   const [fetchError, setFetchError] = useState(null);
   const [loaded, setLoaded] = useState(false);
-  const [search, ] = useState("");
+  const [search] = useState("");
   const [total, setTotal] = useState(0);
-  const [perPage, setPerPage] = useState(5);
+  const [pageSize, setPageSize] = useState(5);
   const [page, setPage] = useState(1);
   const [replyReviewId, setReplyReviewId] = useState(0);
   const [submitReplyError, setSubmitReplyError] = useState(null);
 
   async function fetchReviewsData() {
     try {
-      const data = await fetchPendingReviews({
+      const data = await API.fetchPendingReviews({
         page,
-        perPage,
+        pageSize,
         search,
       });
 
@@ -36,7 +36,7 @@ export default function PendingReviews({ history }) {
 
   useEffect(() => {
     fetchReviewsData();
-  }, [page, perPage, search]);
+  }, [page, pageSize, search]);
 
   const onExpandReply = (reviewId) => {
     setReplyReviewId(reviewId);
@@ -46,7 +46,7 @@ export default function PendingReviews({ history }) {
     try {
       setReplyReviewId(reviewId);
       setSubmitReplyError(null);
-      const data = await replyToReview(reviewId, replyData);
+      const data = await API.replyToReview(reviewId, replyData);
       const newReviews = reviews.map((review) =>
         review.id === reviewId ? data : review
       );
@@ -57,8 +57,8 @@ export default function PendingReviews({ history }) {
     }
   };
 
-  const startIndex = Math.min(perPage * (page - 1) + 1, total);
-  const endIndex = Math.min(startIndex + perPage - 1, total);
+  const startIndex = Math.min(pageSize * (page - 1) + 1, total);
+  const endIndex = Math.min(startIndex + pageSize - 1, total);
 
   const renderTable = () => {
     return (
@@ -88,18 +88,13 @@ export default function PendingReviews({ history }) {
                 <td>{review.user.name}</td>
                 <td>{moment(review.createdAt).format("MMM D, YYYY")}</td>
                 <td>
-                  <StarRatings
-                    rating={review.rate}
-                    starDimension="15px"
-                    starSpacing="0px"
-                    starRatedColor="#da3743"
-                    starHoverColor="#da3743"
-                  />{" "}
-                  <p>{review.comment}</p>
+                  <StarRatings rating={review.rate} /> <p>{review.comment}</p>
                   <ReplyForm
                     title={""}
                     onSubmit={(data) => onReply(review.id, data)}
-                    error={review.id === replyReviewId ? submitReplyError : null}
+                    error={
+                      review.id === replyReviewId ? submitReplyError : null
+                    }
                   />
                 </td>
               </tr>
@@ -124,15 +119,9 @@ export default function PendingReviews({ history }) {
           <div className="float-right"></div>
 
           <Pagination
-            itemClass="page-item"
-            linkClass="page-link"
-            innerClass="pagination float-right"
-            prevPageText="‹"
-            nextPageText="›"
-            activePage={page}
-            itemsCountPerPage={perPage}
-            totalItemsCount={total}
-            pageRangeDisplayed={5}
+            page={page}
+            pageSize={pageSize}
+            total={total}
             onChange={(p) => setPage(p)}
           />
           <div className="float-right mx-4 mt-2">
@@ -142,9 +131,9 @@ export default function PendingReviews({ history }) {
             Show per page &nbsp;
             <select
               className="form-control-sm"
-              value={perPage}
+              value={pageSize}
               onChange={(event) => {
-                setPerPage(parseInt(event.target.value));
+                setPageSize(parseInt(event.target.value));
                 setPage(1);
               }}
             >
@@ -159,5 +148,4 @@ export default function PendingReviews({ history }) {
       </div>
     </div>
   );
-
 }
