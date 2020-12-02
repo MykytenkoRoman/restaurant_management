@@ -174,9 +174,10 @@ export default function Signup({ history }) {
                         className="mr-2"
                         type="radio"
                         onClick={() => setRole("customer")}
+                        onChange={()=>{}}
                         checked={role === "customer"}
                       />
-                      <label className="form-check-label" for="exampleRadios1">
+                      <label className="form-check-label">
                         Customer
                       </label>
                     </div>
@@ -189,6 +190,7 @@ export default function Signup({ history }) {
                         className="mr-2"
                         type="radio"
                         onClick={() => setRole("owner")}
+                        onChange={()=>{}}
                         checked={role === "owner"}
                       />
                       <label className="form-check-label">

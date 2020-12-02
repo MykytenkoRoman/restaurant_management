@@ -21,7 +21,7 @@ router
 
 router
   .route("/:reviewId/reply")
-  .post(authorize(), controller.createReply)
+  .post(authorize(Role.Owner), controller.createReply)
   .patch(authorize(Role.Admin), controller.updateReply)
   .delete(authorize(Role.Admin), controller.removeReply);
 

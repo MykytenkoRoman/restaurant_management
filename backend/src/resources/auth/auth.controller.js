@@ -19,7 +19,7 @@ const signup = async (req, res) => {
   }
 };
 
-const signin = async (req, res) => {
+const signin = async (req, res, next) => {
 
   const invalid = { message: "Email or password is not correct" };
 
